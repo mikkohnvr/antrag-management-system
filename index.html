@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parteitag Antragsmanagement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00bcd4;
+            --primary-dark: #008ba3;
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --bg-card: #1e1e1e;
+            --text: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --warning: #f9a825;
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-darker);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            font-size: 1.4rem;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .button {
+            background: var(--primary);
+            color: var(--bg-darker);
+            border: none;
+            padding: 0.7rem 1.3rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 188, 212, 0.3);
+        }
+
+        .button-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .button-outline:hover {
+            background: rgba(0, 188, 212, 0.1);
+        }
+
+        .container {
+            padding: 2rem;
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .antragsliste {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+        }
+
+        .antrag-card {
+            background-color: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .antrag-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .antrag-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .antrag-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .abstimmungsempfehlung {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--bg-card);
+        }
+
+        .gruen {
+            background-color: var(--success);
+            border-left-color: var(--success);
+        }
+        .rot {
+            background-color: var(--danger);
+            border-left-color: var(--danger);
+        }
+        .gelb {
+            background-color: var(--warning);
+            border-left-color: var(--warning);
+            color: var(--bg-card);
+        }
+
+        .badge {
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--border);
+        }
+
+        /* Live Slideshow Styles */
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            background: var(--bg-darker);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .slide {
+            padding: 2rem;
+            text-align: center;
+            max-width: 800px;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .slide-empfehlung {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel {
+            background: var(--bg-darker);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-list {
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .admin-list-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--bg-darker);
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-3 {
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+            }
+
+            .antragsliste {
+                grid-template-columns: 1fr;
+            }
+
+            .slideshow-container {
+                height: 50vh;
+            }
+
+            .slide-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">
+        <i class="fas fa-landmark"></i>
+        <span>Revolutionärer LPT 25</span>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="#" id="nav-antraege"><i class="fas fa-list"></i> Anträge</a></li>
+            <li><a href="#" id="nav-live"><i class="fas fa-tv"></i> Live</a></li>
+            <li><a href="#" id="nav-admin" class="button"><i class="fas fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+    <!-- Anträge Page -->
+    <div id="page-antraege">
+        <h1 class="page-title">
+            <i class="fas fa-file-alt"></i>
+            Antragsübersicht
+        </h1>
+
+        <ul class="antragsliste" id="antragsliste">
+            <!-- Dynamically filled by JavaScript -->
+        </ul>
+    </div>
+
+    <!-- Live Slideshow Page -->
+    <div id="page-live" class="hidden">
+        <h1 class="page-title">
+            <i class="fas fa-tv"></i>
+            Live Slideshow
+        </h1>
+
+        <div class="slideshow-container">
+            <div id="current-slide" class="slide">
+                <h2 class="slide-title">Kein aktiver Antrag</h2>
+                <p>Warten auf Präsentation...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Page -->
+    <div id="page-admin" class="hidden">
+        <h1 class="page-title">
+            <i class="fas fa-lock"></i>
+            Admin Panel
+        </h1>
+
+        <div class="admin-panel">
+            <div class="admin-controls">
+                <button id="prev-slide" class="button"><i class="fas fa-arrow-left"></i> Vorheriger</button>
+                <button id="next-slide" class="button"><i class="fas fa-arrow-right"></i> Nächster</button>
+                <button id="show-live" class="button"><i class="fas fa-tv"></i> Live anzeigen</button>
+            </div>
+
+            <h3>Anträge verwalten</h3>
+            <div class="admin-list" id="admin-antragsliste">
+                <!-- Dynamically filled by JavaScript -->
+            </div>
+
+            <h3 class="mt-3">Neuen Antrag erstellen</h3>
+            <div class="form-group">
+                <label for="antrag-titel">Antragstitel</label>
+                <input type="text" id="antrag-titel" placeholder="Titel des Antrags">
+            </div>
+            <div class="form-group">
+                <label for="antrag-beschreibung">Beschreibung</label>
+                <textarea id="antrag-beschreibung" placeholder="Ausführliche Beschreibung des Antrags"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="antrag-empfehlung">Abstimmungsempfehlung</label>
+                <select id="antrag-empfehlung">
+                    <option value="gruen">Zustimmung (Grün)</option>
+                    <option value="rot">Ablehnung (Rot)</option>
+                    <option value="gelb">Enthaltung (Gelb)</option>
+                </select>
+            </div>
+            <button id="antrag-erstellen" class="button"><i class="fas fa-plus"></i> Antrag erstellen</button>
+        </div>
+    </div>
+</main>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal">&times;</button>
+        <h2 class="text-center">Admin Login</h2>
+        <div class="form-group">
+            <label for="login-username">Benutzername</label>
+            <input type="text" id="login-username" placeholder="Admin Benutzername">
+        </div>
+        <div class="form-group">
+            <label for="login-password">Passwort</label>
+            <input type="password" id="login-password" placeholder="Passwort">
+        </div>
+        <button id="login-submit" class="button">Anmelden</button>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Parteitag Management System</p>
+</footer>
+
+<script>
+    // WebSocket-Verbindung und State Management
+    let socket;
+    let antraege = [];
+    let currentSlideId = null;
+    let isAdmin = false;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+
+    // DOM Elements
+    const pages = {
+        antraege: document.getElementById('page-antraege'),
+        live: document.getElementById('page-live'),
+        admin: document.getElementById('page-admin')
+    };
+
+    const navLinks = {
+        antraege: document.getElementById('nav-antraege'),
+        live: document.getElementById('nav-live'),
+        admin: document.getElementById('nav-admin')
+    };
+
+    const loginModal = document.getElementById('login-modal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const loginSubmitBtn = document.getElementById('login-submit');
+
+    // WebSocket Initialisierung
+    function initWebSocket() {
+        // Anpassen der WebSocket-URL an Ihren Server
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const wsUrl = `${protocol}${window.location.hostname}:3000`;
+
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+            console.log('Mit Server verbunden');
+            reconnectAttempts = 0;
+
+            // Initiale Daten anfordern
+            if (isAdmin) {
+                socket.send(JSON.stringify({ type: 'REQUEST_INIT', isAdmin: true }));
+            } else {
+                socket.send(JSON.stringify({ type: 'REQUEST_INIT' }));
+            }
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                handleServerMessage(data);
+            } catch (e) {
+                console.error('Fehler beim Parsen der Server-Nachricht:', e);
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket Fehler:', error);
+        };
+
+        socket.onclose = (event) => {
+            console.log(`Verbindung getrennt (Code: ${event.code}, Grund: ${event.reason || 'Unbekannt'})`);
+
+            if (reconnectAttempts < maxReconnectAttempts) {
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000); // Exponentielles Backoff
+                console.log(`Versuche erneut in ${delay}ms...`);
+
+                setTimeout(() => {
+                    reconnectAttempts++;
+                    initWebSocket();
+                }, delay);
+            } else {
+                console.error('Maximale Wiederherstellungsversuche erreicht');
+                alert('Verbindung zum Server verloren. Bitte Seite neu laden.');
+            }
+        };
+    }
+
+    // Server-Nachrichten verarbeiten
+    function handleServerMessage(data) {
+        switch(data.type) {
+            case 'INIT':
+                antraege = data.antraege || [];
+                currentSlideId = data.currentSlideId || null;
+
+                renderAntragsliste();
+                renderAdminAntragsliste();
+
+                if (currentSlideId && !pages.live.classList.contains('hidden')) {
+                    showAntragAsSlide(currentSlideId, false); // Kein Broadcast
+                }
+                break;
+
+            case 'SLIDE_CHANGED':
+                currentSlideId = data.slideId;
+                if (!pages.live.classList.contains('hidden')) {
+                    showAntragAsSlide(currentSlideId, false); // Kein Broadcast
+                }
+                break;
+
+            case 'ANTRAG_ADDED':
+                // Vermeide Duplikate
+                if (!antraege.some(a => a.id === data.antrag.id)) {
+                    antraege.push(data.antrag);
+                    renderAntragsliste();
+                    renderAdminAntragsliste();
+
+                    // Erfolgsmeldung nur für den Admin, der den Antrag erstellt hat
+                    if (data.source === 'self' && isAdmin) {
+                        alert(`Antrag #${data.antrag.id} erfolgreich erstellt!`);
+                    }
+                }
+                break;
+
+            case 'ANTRAG_DELETED':
+                antraege = antraege.filter(a => a.id !== data.antragId);
+                renderAntragsliste();
+                renderAdminAntragsliste();
+
+                if (currentSlideId === data.antragId) {
+                    currentSlideId = null;
+                    if (!pages.live.classList.contains('hidden')) {
+                        document.getElementById('current-slide').innerHTML = `
+                            <h2 class="slide-title">Kein aktiver Antrag</h2>
+                            <p>Warten auf Präsentation...</p>
+                        `;
+                    }
+                }
+
+                if (data.source === 'self' && isAdmin) {
+                    alert('Antrag erfolgreich gelöscht!');
+                }
+                break;
+
+            case 'AUTH_REQUIRED':
+                if (isAdmin) {
+                    loginModal.style.display = 'flex';
+                }
+                break;
+
+            case 'ERROR':
+                console.error('Serverfehler:', data.message);
+                if (data.showToUser) {
+                    alert(`Fehler: ${data.message}`);
+                }
+                break;
+        }
+    }
+
+    // Antragsliste rendern
+    function renderAntragsliste() {
+        const liste = document.getElementById('antragsliste');
+        liste.innerHTML = '';
+
+        antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
+            const empfehlungClass = antrag.empfehlung;
+            let empfehlungText = '';
+
+            switch(antrag.empfehlung) {
+                case 'gruen': empfehlungText = 'Zustimmung'; break;
+                case 'rot': empfehlungText = 'Ablehnung'; break;
+                case 'gelb': empfehlungText = 'Enthaltung'; break;
+            }
+
+            const li = document.createElement('li');
+            li.className = `antrag-card ${empfehlungClass}`;
+            li.innerHTML = `
+                <h3 class="antrag-title">Antrag ${antrag.id}: ${antrag.titel}</h3>
+                <p>${antrag.beschreibung}</p>
+                <div class="antrag-meta">
+                    <span class="badge">#${antrag.id}</span>
+                    <div class="abstimmungsempfehlung ${empfehlungClass}" title="${empfehlungText}">
+                        ${empfehlungText.charAt(0)}
+                    </div>
+                </div>
+            `;
+            liste.appendChild(li);
+        });
+    }
+
+    // Admin-Antragsliste rendern
+    function renderAdminAntragsliste() {
+        const liste = document.getElementById('admin-antragsliste');
+        liste.innerHTML = '';
+
+        antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
+            const empfehlungClass = antrag.empfehlung;
+
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.innerHTML = `
+                <div>
+                    <strong>Antrag ${antrag.id}:</strong> ${antrag.titel}
+                    <div class="abstimmungsempfehlung ${empfehlungClass}" style="margin-top: 0.5rem;"></div>
+                </div>
+                <div>
+                    <button class="button button-outline show-slide-btn" data-id="${antrag.id}">
+                        <i class="fas fa-tv"></i> Anzeigen
+                    </button>
+                    <button class="button button-outline delete-antrag-btn" data-id="${antrag.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            liste.appendChild(div);
+        });
+
+        // Event-Listener für die neuen Buttons hinzufügen
+        document.querySelectorAll('.show-slide-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                showAntragAsSlide(id);
+            });
+        });
+
+        document.querySelectorAll('.delete-antrag-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                deleteAntrag(id);
+            });
+        });
+    }
+
+    // Antrag in der Slideshow anzeigen
+    function showAntragAsSlide(id, broadcast = true) {
+        const antrag = antraege.find(a => a.id === id);
+        if (!antrag) return;
+
+        const slide = document.getElementById('current-slide');
+        slide.className = `slide active ${antrag.empfehlung}`;
+
+        let empfehlungText = '';
+        switch(antrag.empfehlung) {
+            case 'gruen': empfehlungText = 'Empfehlung: Zustimmung'; break;
+            case 'rot': empfehlungText = 'Empfehlung: Ablehnung'; break;
+            case 'gelb': empfehlungText = 'Empfehlung: Enthaltung'; break;
+        }
+
+        slide.innerHTML = `
+            <h2 class="slide-title">Antrag ${antrag.id}: ${antrag.titel}</h2>
+            <p>${antrag.beschreibung}</p>
+            <div class="slide-empfehlung ${antrag.empfehlung}">${empfehlungText}</div>
+        `;
+
+        // Änderung an Server senden (wenn nicht durch Server-Update ausgelöst)
+        if (broadcast && socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'CHANGE_SLIDE',
+                slideId: id
+            }));
+        }
+    }
+
+    // Seiten-Navigation
+    function showPage(pageName) {
+        // Alle Seiten verstecken
+        Object.values(pages).forEach(page => page.classList.add('hidden'));
+
+        // Gewählte Seite anzeigen
+        pages[pageName].classList.remove('hidden');
+
+        // Bei Live-Seite aktuellen Slide anzeigen
+        if (pageName === 'live' && currentSlideId) {
+            showAntragAsSlide(currentSlideId, false);
+        }
+    }
+
+    // Event-Handler einrichten
+    function setupEventListeners() {
+        // Navigation
+        navLinks.antraege.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('antraege');
+        });
+
+        navLinks.live.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('live');
+        });
+
+        navLinks.admin.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (isAdmin) {
+                showPage('admin');
+            } else {
+                loginModal.style.display = 'flex';
+            }
+        });
+
+        // Admin-Steuerelemente
+        document.getElementById('prev-slide').addEventListener('click', () => {
+            if (antraege.length === 0) return;
+
+            let currentIndex = currentSlideId ? antraege.findIndex(a => a.id === currentSlideId) : -1;
+            let newIndex = currentIndex - 1;
+
+            if (newIndex < 0) newIndex = antraege.length - 1;
+            if (newIndex >= 0) {
+                showAntragAsSlide(antraege[newIndex].id);
+            }
+        });
+
+        document.getElementById('next-slide').addEventListener('click', () => {
+            if (antraege.length === 0) return;
+
+            let currentIndex = currentSlideId ? antraege.findIndex(a => a.id === currentSlideId) : -1;
+            let newIndex = currentIndex + 1;
+
+            if (newIndex >= antraege.length) newIndex = 0;
+            showAntragAsSlide(antraege[newIndex].id);
+        });
+
+        document.getElementById('show-live').addEventListener('click', () => {
+            showPage('live');
+        });
+
+        document.getElementById('antrag-erstellen').addEventListener('click', createAntrag);
+
+        // Login-Modal
+        closeModalBtn.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        loginSubmitBtn.addEventListener('click', () => {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            if (username === 'admin' && password === 'partei2025') {
+                isAdmin = true;
+                loginModal.style.display = 'none';
+
+                // Bei erfolgreicher Anmeldung Admin-Daten anfordern
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'AUTHENTICATE',
+                        username,
+                        password
+                    }));
+                }
+
+                showPage('admin');
+            } else {
+                alert('Falsche Anmeldedaten!');
+            }
+        });
+
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+    }
+
+    // Neuen Antrag erstellen
+    function createAntrag() {
+        const titel = document.getElementById('antrag-titel').value.trim();
+        const beschreibung = document.getElementById('antrag-beschreibung').value.trim();
+        const empfehlung = document.getElementById('antrag-empfehlung').value;
+
+        if (!titel || !beschreibung) {
+            alert('Bitte füllen Sie alle Felder aus!');
+            return;
+        }
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'CREATE_ANTRAG',
+                antrag: {
+                    titel,
+                    beschreibung,
+                    empfehlung
+                },
+                source: 'self'
+            }));
+
+            // Formular zurücksetzen
+            document.getElementById('antrag-titel').value = '';
+            document.getElementById('antrag-beschreibung').value = '';
+            document.getElementById('antrag-empfehlung').value = 'gruen';
+        } else {
+            alert('Keine Verbindung zum Server! Antrag konnte nicht erstellt werden.');
+        }
+    }
+
+    // Antrag löschen
+    function deleteAntrag(id) {
+        if (!confirm('Möchten Sie diesen Antrag wirklich löschen?')) return;
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'DELETE_ANTRAG',
+                antragId: id,
+                source: 'self'
+            }));
+        } else {
+            alert('Keine Verbindung zum Server! Antrag konnte nicht gelöscht werden.');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initWebSocket();
+        setupEventListeners();
+        showPage('antraege');
+    });
+</script>
+</body>
+</html>
