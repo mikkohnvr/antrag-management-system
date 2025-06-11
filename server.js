@@ -31,6 +31,8 @@ wss.on('connection', (ws) => {
                         data.password === adminCredentials.password) {
                         isAuthenticated = true;
                         ws.send(JSON.stringify({ type: 'AUTH_SUCCESS' }));
+                    } else {
+                        ws.send(JSON.stringify({ type: 'AUTH_FAILED' }));
                     }
                     break;
 
@@ -58,6 +60,48 @@ wss.on('connection', (ws) => {
                     if (index !== -1) {
                         antraege.splice(index, 1);
                         broadcast({ type: 'ANTRAG_DELETED', antragId: data.antragId });
+                    }
+                    break;
+
+                case 'EXPORT_REQUEST':
+                    if (!isAuthenticated) break;
+                    ws.send(JSON.stringify({
+                        type: 'EXPORT_DATA',
+                        data: antraege,
+                        filename: `antraege_${new Date().toISOString().slice(0,10)}.json`
+                    }));
+                    break;
+
+                case 'IMPORT_DATA':
+                    if (!isAuthenticated || !data.data) break;
+                    try {
+                        const importedData = data.data;
+                        if (!Array.isArray(importedData)) {
+                            throw new Error('Invalid data format');
+                        }
+
+                        // Validate each antrag
+                        const isValid = importedData.every(antrag => 
+                            antrag.id && antrag.titel && antrag.beschreibung && antrag.empfehlung
+                        );
+
+                        if (!isValid) {
+                            throw new Error('Invalid antrag structure');
+                        }
+
+                        antraege = importedData;
+                        currentSlideId = null;
+                        broadcast({ 
+                            type: 'INIT', 
+                            antraege, 
+                            currentSlideId 
+                        });
+                        ws.send(JSON.stringify({ type: 'IMPORT_SUCCESS' }));
+                    } catch (error) {
+                        ws.send(JSON.stringify({ 
+                            type: 'IMPORT_ERROR',
+                            message: error.message
+                        }));
                     }
                     break;
             }
