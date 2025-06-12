@@ -46,6 +46,16 @@
             } else {
                 socket.send(JSON.stringify({ type: 'REQUEST_INIT' }));
             }
+
+            const sessionToken = getCookie('sessionToken');
+        
+            if (sessionToken) {
+                // Validate token with server
+                socket.send(JSON.stringify({ 
+                    type: 'COOKIE_CHECK',
+                    uuid: sessionToken 
+                }));
+            }
         };
 
         socket.onmessage = (event) => {
@@ -144,13 +154,27 @@
                 break;
 
             case 'AUTH_SUCCESS':
+                console.log(data.uuid);
                 isAdmin = true;
                 loginModal.style.display = 'none';
                 showPage('admin');
+                if (data.uuid) {
+                    setCookie('sessionToken', data.uuid, 1);
+                }
                 break;
             
             case 'AUTH_FAILED':
                 alert('Falsche Anmeldedaten!');
+                break;
+
+            case 'COOKIE_SUCCESS':
+                console.log("Cookie success")
+                isAdmin = true;
+                break;
+                
+            case 'COOKIE_FAILED':
+                console.log("Cookie failed")
+                deleteCookie('sessionToken');
                 break;
 
 
@@ -456,7 +480,34 @@ function importAntraege(event) {
 }
 
 
+function setCookie(name, value, daysToLive) {
+    const date = new Date();
+    date.setTime(date.getTime() + (daysToLive * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = `${name}=${value}; ${expires}; path=/; Secure; SameSite=Strict`;
+    console.log("Cookie gesetzt")
+}
 
+function getCookie(name) {
+    const cookieName = name + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
+    
+    for(let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i];
+        while (cookie.charAt(0) === ' ') {
+            cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(cookieName) === 0) {
+            return cookie.substring(cookieName.length, cookie.length);
+        }
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    setCookie(name, "", -1);
+}
 
 
 

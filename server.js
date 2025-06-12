@@ -1,10 +1,12 @@
 const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
+const uuid = require('uuid');
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
+const lifeTimeUUID = uuid.v4();
 
 // In-Memory Datenbank
 let antraege = [];
@@ -30,9 +32,18 @@ wss.on('connection', (ws) => {
                     if (data.username === adminCredentials.username &&
                         data.password === adminCredentials.password) {
                         isAuthenticated = true;
-                        ws.send(JSON.stringify({ type: 'AUTH_SUCCESS' }));
+                        ws.send(JSON.stringify({ type: 'AUTH_SUCCESS', uuid: lifeTimeUUID}));
                     } else {
                         ws.send(JSON.stringify({ type: 'AUTH_FAILED' }));
+                    }
+                    break;
+
+                case 'COOKIE_CHECK':
+                    if(data.uuid === lifeTimeUUID) {
+                        isAuthenticated = true;
+                        ws.send(JSON.stringify({ type: 'COOKIE_SUCCESS'}));
+                    } else {
+                        ws.send(JSON.stringify({ type: 'COOKIE_FAILED' }));
                     }
                     break;
 
