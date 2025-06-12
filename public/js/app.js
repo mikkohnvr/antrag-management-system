@@ -40,15 +40,8 @@
             reconnectAttempts = 0;
             connectionPopup.classList.add('hidden');
 
-            // Initiale Daten anfordern
-            if (isAdmin) {
-                socket.send(JSON.stringify({ type: 'REQUEST_INIT', isAdmin: true }));
-            } else {
-                socket.send(JSON.stringify({ type: 'REQUEST_INIT' }));
-            }
-
+            socket.send(JSON.stringify({ type: 'REQUEST_INIT' }));
             const sessionToken = getCookie('sessionToken');
-        
             if (sessionToken) {
                 // Validate token with server
                 socket.send(JSON.stringify({ 
@@ -86,7 +79,7 @@
                     initWebSocket();
                 }, delay);
             } else {
-                  document.querySelector('.connection-popup-content p').textContent = 'Failed to reconnect. Please reload the page.';
+                  document.querySelector('.connection-popup-content p').textContent = 'Verbindung verloren. Bitte Seite neu laden!';
             }
         };
     }
@@ -154,7 +147,6 @@
                 break;
 
             case 'AUTH_SUCCESS':
-                console.log(data.uuid);
                 isAdmin = true;
                 loginModal.style.display = 'none';
                 showPage('admin');
@@ -168,12 +160,10 @@
                 break;
 
             case 'COOKIE_SUCCESS':
-                console.log("Cookie success")
                 isAdmin = true;
                 break;
                 
             case 'COOKIE_FAILED':
-                console.log("Cookie failed")
                 deleteCookie('sessionToken');
                 break;
 
@@ -341,6 +331,8 @@
             showPage('live');
         });
 
+        
+
         navLinks.admin.addEventListener('click', (e) => {
             e.preventDefault();
             if (isAdmin) {
@@ -348,6 +340,13 @@
             } else {
                 loginModal.style.display = 'flex';
             }
+
+        reloadPageButton.addEventListener('click', () => {
+            location.reload();
+            });
+
+        document.getElementById('export-btn').addEventListener('click', exportAntraege);
+        document.getElementById('import-file').addEventListener('change', importAntraege);
         });
 
         // Admin-Steuerelemente
@@ -485,7 +484,6 @@ function setCookie(name, value, daysToLive) {
     date.setTime(date.getTime() + (daysToLive * 24 * 60 * 60 * 1000));
     const expires = "expires=" + date.toUTCString();
     document.cookie = `${name}=${value}; ${expires}; path=/; Secure; SameSite=Strict`;
-    console.log("Cookie gesetzt")
 }
 
 function getCookie(name) {
@@ -511,21 +509,8 @@ function deleteCookie(name) {
 
 
 
-
-
-
-
-
-
-document.getElementById('export-btn').addEventListener('click', exportAntraege);
-document.getElementById('import-file').addEventListener('change', importAntraege);
-
-    reloadPageButton.addEventListener('click', () => {
-     location.reload();
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        initWebSocket();
-        setupEventListeners();
-        showPage('antraege');
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    initWebSocket();
+    setupEventListeners();
+    showPage('antraege');
+});
