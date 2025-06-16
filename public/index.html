@@ -6,7 +6,7 @@
     <title>Parteitag Antragsmanagement</title>
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="stylesheet" href="css/privateStyle.css">
-	<link href="img/favicon-32x32.png" rel="icon" type="image/png">
+    <link href="img/favicon-32x32.png" rel="icon" type="image/png">
 </head>
 <body>
 <header>
@@ -24,34 +24,29 @@
 </header>
 
 <div id="connection-lost-popup" class="connection-popup hidden">
-  <div class="connection-popup-content">
-    <h3>Verbindung verloren!</h3>
-    <p>Versuche die Verbindung wieder herzustellen... <span id="reconnect-attempt">0</span>/<span id="max-reconnect">5</span></p>
-    <div class="connection-progress"></div>
-    <button id="reload-page" class="button">Seite neu laden</button>
-  </div>
+    <div class="connection-popup-content">
+        <h3>Verbindung verloren!</h3>
+        <p>Versuche die Verbindung wieder herzustellen... <span id="reconnect-attempt">0</span>/<span id="max-reconnect">5</span></p>
+        <div class="connection-progress"></div>
+        <button id="reload-page" class="button">Seite neu laden</button>
+    </div>
 </div>
 
 <main class="container">
-    <!-- Anträge Page -->
     <div id="page-antraege">
         <h1 class="page-title">
             <i class="fas fa-file-alt"></i>
             Antragsübersicht
         </h1>
-
         <ul class="antragsliste" id="antragsliste">
-            <!-- Dynamically filled by JavaScript -->
         </ul>
     </div>
 
-    <!-- Live Slideshow Page -->
     <div id="page-live" class="hidden">
         <h1 class="page-title">
             <i class="fas fa-tv"></i>
             Live Slideshow
         </h1>
-
         <div class="slideshow-container">
             <div id="current-slide" class="slide">
                 <h2 class="slide-title">Kein aktiver Antrag</h2>
@@ -60,13 +55,11 @@
         </div>
     </div>
 
-    <!-- Admin Panel Page -->
     <div id="page-admin" class="hidden">
         <h1 class="page-title">
             <i class="fas fa-lock"></i>
             Admin Panel
         </h1>
-
         <div class="admin-panel">
             <div class="admin-controls">
                 <button id="prev-slide" class="button"><i class="fas fa-arrow-left"></i> Vorheriger</button>
@@ -74,16 +67,13 @@
                 <button id="show-live" class="button"><i class="fas fa-tv"></i> Live anzeigen</button>
                 <button id="export-btn" class="button">Export Anträge</button>
                 <label for="import-file" class="button" style="margin-bottom: 0 !important;">
-                     Import Anträge
+                    Import Anträge
                     <input type="file" id="import-file" accept=".json" style="display: none;">
                 </label>
             </div>
-
             <h3>Anträge verwalten</h3>
             <div class="admin-list" id="admin-antragsliste">
-                <!-- Dynamically filled by JavaScript -->
             </div>
-
             <h3 class="mt-3">Neuen Antrag erstellen</h3>
             <div class="form-group">
                 <label for="antrag-titel">Antragstitel</label>
@@ -92,6 +82,14 @@
             <div class="form-group">
                 <label for="antrag-beschreibung">Beschreibung</label>
                 <textarea id="antrag-beschreibung" placeholder="Ausführliche Beschreibung des Antrags"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="antrag-antragsteller">Antragsteller*in</label>
+                <input type="text" id="antrag-antragsteller" placeholder="Name der Antragsteller*in">
+            </div>
+            <div class="form-group">
+                <label for="antrag-links">Links (Komma-getrennt)</label>
+                <input type="text" id="antrag-links" placeholder="https://beispiel.de, https://link2.de">
             </div>
             <div class="form-group">
                 <label for="antrag-empfehlung">Abstimmungsempfehlung</label>
@@ -106,7 +104,6 @@
     </div>
 </main>
 
-<!-- Login Modal -->
 <div id="login-modal" class="modal">
     <div class="modal-content">
         <button class="close-modal">&times;</button>
@@ -123,8 +120,19 @@
     </div>
 </div>
 
+<div id="antrag-detail-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal" id="close-antrag-detail-modal">&times;</button>
+        <h2 id="detail-antrag-title"></h2>
+        <p id="detail-antrag-antragsteller" class="antrag-meta-info"></p>
+        <p id="detail-antrag-beschreibung"></p>
+        <div id="detail-antrag-links" class="antrag-meta-info"></div>
+        <div id="detail-antrag-empfehlung" class="abstimmungsempfehlung" style="margin-top: 1rem;"></div>
+    </div>
+</div>
+
 <footer>
-    <p>&copy; 2025 Parteitag Management System</p>
+    <p>Linksjugend ['solid] Hannover - Developed with ❤️ by Mikko & Aron</p>
 </footer>
 
 <script src="js/app.js" defer></script>

@@ -62,7 +62,12 @@ wss.on('connection', (ws) => {
                     if (!isAuthenticated || !data.antrag) break;
 
                     const newId = antraege.length > 0 ? Math.max(...antraege.map(a => a.id)) + 1 : 1;
-                    const newAntrag = { ...data.antrag, id: newId };
+                    const newAntrag = {
+                        ...data.antrag,
+                        id: newId,
+                        antragsteller: data.antrag.antragsteller || '',
+                        links: data.antrag.links || []
+                    };
                     antraege.push(newAntrag);
 
                     broadcast({ type: 'ANTRAG_ADDED', antrag: newAntrag });
@@ -91,25 +96,25 @@ wss.on('connection', (ws) => {
                     const antragID = data.antragId;
                     if(antragID == 1) { break; }
                     antraege = swapAndSortById(antraege, antragID, antragID-1);
-                    broadcast({ 
-                        type: 'INIT', 
-                        antraege, 
-                        currentSlideId 
+                    broadcast({
+                        type: 'INIT',
+                        antraege,
+                        currentSlideId
                     });
                     break;
-                
+
                 case 'MOVE_ANTRAG_DOWN':
                     const downAntragID = data.antragId;
                     // Find highest current ID to prevent moving the last item down
                     const maxId = Math.max(...antraege.map(a => a.id));
-                    if(downAntragID === maxId) { 
-                        break; 
+                    if(downAntragID === maxId) {
+                        break;
                     }
                     antraege = swapAndSortById(antraege, downAntragID, downAntragID + 1);
-                    broadcast({ 
-                        type: 'INIT', 
-                        antraege, 
-                        currentSlideId 
+                    broadcast({
+                        type: 'INIT',
+                        antraege,
+                        currentSlideId
                     });
                     break;
 
@@ -122,8 +127,10 @@ wss.on('connection', (ws) => {
                         }
 
                         // Validate each antrag
-                        const isValid = importedData.every(antrag => 
-                            antrag.id && antrag.titel && antrag.beschreibung && antrag.empfehlung
+                        const isValid = importedData.every(antrag =>
+                            antrag.id && antrag.titel && antrag.beschreibung && antrag.empfehlung &&
+                            typeof antrag.antragsteller === 'string' &&
+                            Array.isArray(antrag.links)
                         );
 
                         if (!isValid) {
@@ -132,14 +139,14 @@ wss.on('connection', (ws) => {
 
                         antraege = importedData;
                         currentSlideId = null;
-                        broadcast({ 
-                            type: 'INIT', 
-                            antraege, 
-                            currentSlideId 
+                        broadcast({
+                            type: 'INIT',
+                            antraege,
+                            currentSlideId
                         });
                         ws.send(JSON.stringify({ type: 'IMPORT_SUCCESS' }));
                     } catch (error) {
-                        ws.send(JSON.stringify({ 
+                        ws.send(JSON.stringify({
                             type: 'IMPORT_ERROR',
                             message: error.message
                         }));
@@ -171,7 +178,7 @@ function broadcast(data) {
 }
 
 // Statische Dateien servieren
-app.use(express.static('public'));
+app.use(express.static('.'));
 
 server.listen(port, '0.0.0.0', () => {
     console.log('Server läuft auf http://<Ihre-IP>:'+port);

@@ -3,8 +3,8 @@
     --primary-dark: #008ba3;
     --bg-dark: #121212;
     --bg-darker: #0a0a0a;
-    --bg-card: #1e1e1e;
-    --text: #e0e0e0;
+    --bg-card: #1e1e1e; /* This is the dark background for cards */
+    --text: #e0e0e0; /* This is your desired white/light grey text color */
     --text-secondary: #a0a0a0;
     --success: #2e7d32;
     --danger: #c62828;
@@ -12,16 +12,26 @@
     --border: #333;
 }
 
+/* Ensure global box-sizing for consistent width calculations */
+html {
+    box-sizing: border-box;
+}
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-dark);
-    color: var(--text);
+    color: var(--text); /* Default text color for the whole body */
     margin: 0;
     padding: 0;
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* Prevent horizontal scroll from overflowing content */
+    overflow-x: hidden;
 }
 
 header {
@@ -82,6 +92,7 @@ nav a:hover {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap; /* Prevent button text from wrapping */
 }
 
 .button:hover {
@@ -121,19 +132,86 @@ nav a:hover {
     list-style: none;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    /* Adjust minmax to be slightly smaller to account for potential gaps/margins */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1rem;
 }
 
 .antrag-card {
-    background-color: var(--bg-card);
-    padding: 1.5rem;
-    border-radius: 10px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 4px solid var(--border);
+    width: 100%; /* Ensure it takes 100% of its grid column */
+    max-width: 420px;
+    min-width: 280px;
+    min-height: 220px; /* Optional: Set a minimum height */
+    box-sizing: border-box; /* Crucial for width calculation */
+    overflow: hidden; /* Keep this to ensure text truncation works */
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    justify-content: flex-start;
+    margin: 1rem auto; /* Centers the card within its grid cell */
+    padding: 1rem;
+    background: var(--bg-card); /* Changed to dark background */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    color: var(--text); /* Set default text color for the card content to white/light grey */
+}
+
+.antrag-card .antrag-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text); /* Ensure title is white/light grey */
+}
+
+.antrag-card p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Zeilenanzahl anpassen */
+    -webkit-box-orient: vertical;
+    margin-bottom: 0.5rem;
+    flex-grow: 1;   /* Allow the paragraph to grow */
+    flex-shrink: 1; /* Allow the paragraph to shrink */
+    min-height: 0; /* Important for flex items with min-height/max-height */
+    color: var(--text); /* Ensure paragraph is white/light grey */
+}
+
+/* Ensure the links section also takes up its space */
+.antrag-card .antrag-links {
+    margin-top: 0.5rem; /* Add some space above links if they appear */
+    margin-bottom: 0.8rem; /* Added space below links for the overview card */
+    color: var(--text); /* Ensure links container text is white/light grey */
+}
+.antrag-card .antrag-links ul {
+    margin: 0;
+    padding-left: 20px; /* Adjust as needed for bullet points */
+    word-break: break-word; /* Allow long links to break */
+}
+.antrag-card .antrag-links li {
+    white-space: nowrap; /* Keep this for ellipsis on single line links */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.antrag-card .antrag-links a {
+    color: var(--primary); /* Links inside card can be primary color for visibility */
+    text-decoration: underline;
+    word-break: break-all; /* Allow very long words/URLs to break */
+}
+
+.antrag-card .antrag-meta {
+    margin-top: auto; /* Pushes this element to the bottom */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text); /* Ensure meta info is white/light grey */
+}
+
+.antrag-card .antrag-meta-info {
+    color: var(--text); /* For elements like Antragsteller*in within the card */
 }
 
 .antrag-card:hover {
@@ -163,7 +241,7 @@ nav a:hover {
     justify-content: center;
     font-size: 0.8rem;
     font-weight: bold;
-    color: var(--bg-card);
+    color: var(--bg-card); /* Keep this as it is the background of the circle itself */
 }
 
 .gruen {
@@ -177,7 +255,7 @@ nav a:hover {
 .gelb {
     background-color: var(--warning);
     border-left-color: var(--warning);
-    color: var(--bg-card);
+    color: var(--bg-card); /* Keep this as it is the background of the circle itself */
 }
 
 .badge {
@@ -186,6 +264,7 @@ nav a:hover {
     font-size: 0.8rem;
     font-weight: 600;
     background: var(--border);
+    color: var(--text); /* Badge text color should remain white/light */
 }
 
 /* Live Slideshow Styles */
@@ -208,6 +287,8 @@ nav a:hover {
     text-align: center;
     max-width: 800px;
     display: none;
+    width: 100%; /* Ensure slide uses full available width */
+    box-sizing: border-box; /* Include padding in width */
 }
 
 .slide.active {
@@ -219,6 +300,7 @@ nav a:hover {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
     color: var(--text);
+    word-break: break-word; /* Allow long titles to wrap */
 }
 
 .slide-empfehlung {
@@ -241,7 +323,8 @@ nav a:hover {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+    justify-content: center; /* Center buttons when they wrap */
 }
 
 .admin-list {
@@ -256,11 +339,25 @@ nav a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: var(--text); /* Admin list item text color */
+    flex-wrap: wrap; /* Allow content inside list item to wrap */
+    gap: 0.5rem; /* Space between wrapped items */
+}
+
+.admin-list-item > div:first-child {
+    flex-grow: 1; /* Allow content to take available space */
+    min-width: 0; /* Allow content to shrink below its intrinsic size */
 }
 
 .admin-list-item:last-child {
     border-bottom: none;
 }
+
+.admin-list-item a { /* For links within admin list items */
+    color: var(--primary);
+    word-break: break-all; /* Allow long links to break */
+}
+
 
 .form-group {
     margin-bottom: 1.5rem;
@@ -270,6 +367,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
+    color: var(--text); /* Label color */
 }
 
 input, select, textarea {
@@ -278,7 +376,7 @@ input, select, textarea {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 6px;
-    color: var(--text);
+    color: var(--text); /* Input text color */
     font-family: inherit;
 }
 
@@ -299,15 +397,18 @@ textarea {
     z-index: 1000;
     justify-content: center;
     align-items: center;
+    overflow-y: auto; /* Allow scrolling if modal content is too long */
 }
 
 .modal-content {
     background: var(--bg-card);
     padding: 2rem;
     border-radius: 10px;
-    width: 100%;
+    width: 90%; /* Use percentage for mobile responsiveness */
     max-width: 400px;
     position: relative;
+    color: var(--text); /* Modal content text color */
+    box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .close-modal {
@@ -361,8 +462,18 @@ footer {
         gap: 1rem;
     }
 
+    .container {
+        padding: 1rem; /* Reduce padding on smaller screens */
+    }
+
     .antragsliste {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Full width for cards on small screens */
+        gap: 0.5rem; /* Reduce gap */
+    }
+
+    .antrag-card {
+        margin: 0.5rem auto; /* Reduce margin */
+        min-width: unset; /* Allow it to shrink to fit */
     }
 
     .slideshow-container {
@@ -372,55 +483,110 @@ footer {
     .slide-title {
         font-size: 1.8rem;
     }
+
+    .admin-controls .button {
+        width: 100%; /* Make buttons full width in admin controls */
+        justify-content: center; /* Center text/icon in button */
+    }
+
+    .admin-list-item {
+        flex-direction: column; /* Stack content vertically in admin list */
+        align-items: flex-start;
+    }
+
+    .admin-list-item > div:first-child {
+        margin-bottom: 0.5rem; /* Space between content and buttons */
+    }
+
+    .admin-list-item > div:last-child {
+        width: 100%; /* Make buttons container full width */
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .admin-list-item > div:last-child .button {
+        flex-grow: 1; /* Allow buttons to grow and fill space */
+        min-width: unset; /* Prevent them from forcing overflow */
+    }
 }
 
+/* Extra small screens / Portrait phones */
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1.5rem;
+    }
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    nav a {
+        font-size: 0.9rem;
+    }
+    .page-title {
+        font-size: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .slide {
+        padding: 1rem; /* Reduce slide padding */
+    }
+    .slide-title {
+        font-size: 1.5rem;
+    }
+    .slide-empfehlung {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+    }
+}
+
+
 .connection-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .connection-popup-content {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #fff; /* Keep this white as it's a popup */
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%; /* Use percentage for responsiveness */
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: var(--bg-darker); /* Popup content text color for readability on white */
 }
 
 .connection-popup h3 {
-  color: #d32f2f;
-  margin-bottom: 1rem;
+    color: #d32f2f;
+    margin-bottom: 1rem;
 }
 
 .connection-progress {
-  height: 4px;
-  background-color: #e0e0e0;
-  border-radius: 2px;
-  margin: 1rem 0;
-  overflow: hidden;
+    height: 4px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    margin: 1rem 0;
+    overflow: hidden;
 }
 
 .connection-progress::after {
-  content: '';
-  display: block;
-  height: 100%;
-  width: 0%;
-  background-color: #d32f2f;
-  animation: progressBar 2.5s linear infinite;
+    content: '';
+    display: block;
+    height: 100%;
+    width: 0%;
+    background-color: #d32f2f;
+    animation: progressBar 2.5s linear infinite;
 }
 
 @keyframes progressBar {
-  0% { width: 0%; }
-  100% { width: 100%; }
+    0% { width: 0%; }
+    100% { width: 100%; }
 }
-
