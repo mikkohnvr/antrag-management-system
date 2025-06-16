@@ -250,6 +250,12 @@
                     <button class="button button-outline show-slide-btn" data-id="${antrag.id}">
                         <i class="fas fa-tv"></i> Anzeigen
                     </button>
+                    <button class="button button-outline move-up-btn" data-id="${antrag.id}">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button class="button button-outline move-down-btn" data-id="${antrag.id}">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
                     <button class="button button-outline delete-antrag-btn" data-id="${antrag.id}">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -270,6 +276,20 @@
             btn.addEventListener('click', function() {
                 const id = parseInt(this.getAttribute('data-id'));
                 deleteAntrag(id);
+            });
+        });
+
+        document.querySelectorAll('.move-up-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                moveAntragUp(id);
+            });
+        });
+
+        document.querySelectorAll('.move-down-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'));
+                moveAntragDown(id);
             });
         });
     }
@@ -447,6 +467,30 @@
             }));
         } else {
             alert('Keine Verbindung zum Server! Antrag konnte nicht gelöscht werden.');
+        }
+    }
+
+    function moveAntragUp(antragId) {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'MOVE_ANTRAG_UP',
+                antragId: antragId,
+                source: 'self'
+            }));
+        } else {
+            alert('Keine Verbindung zum Server! Antrag konnte nicht verschoben werden.');
+        }
+    }
+
+    function moveAntragDown(antragId) {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'MOVE_ANTRAG_DOWN',
+                antragId: antragId,
+                source: 'self'
+            }));
+        } else {
+            alert('Keine Verbindung zum Server! Antrag konnte nicht verschoben werden.');
         }
     }
 

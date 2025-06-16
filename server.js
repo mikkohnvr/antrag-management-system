@@ -1,17 +1,21 @@
+require('dotenv').config();
 const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
 const uuid = require('uuid');
+
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const lifeTimeUUID = uuid.v4();
 
+
 // In-Memory Datenbank
 let antraege = [];
 let currentSlideId = null;
-const adminCredentials = { username: 'admin', password: 'partei2025' };
+let port = 3000;
+const adminCredentials = { username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD};
 
 // WebSocket Server
 wss.on('connection', (ws) => {
@@ -83,6 +87,32 @@ wss.on('connection', (ws) => {
                     }));
                     break;
 
+                case 'MOVE_ANTRAG_UP':
+                    const antragID = data.antragId;
+                    if(antragID == 1) { break; }
+                    antraege = swapAndSortById(antraege, antragID, antragID-1);
+                    broadcast({ 
+                        type: 'INIT', 
+                        antraege, 
+                        currentSlideId 
+                    });
+                    break;
+                
+                case 'MOVE_ANTRAG_DOWN':
+                    const downAntragID = data.antragId;
+                    // Find highest current ID to prevent moving the last item down
+                    const maxId = Math.max(...antraege.map(a => a.id));
+                    if(downAntragID === maxId) { 
+                        break; 
+                    }
+                    antraege = swapAndSortById(antraege, downAntragID, downAntragID + 1);
+                    broadcast({ 
+                        type: 'INIT', 
+                        antraege, 
+                        currentSlideId 
+                    });
+                    break;
+
                 case 'IMPORT_DATA':
                     if (!isAuthenticated || !data.data) break;
                     try {
@@ -122,6 +152,16 @@ wss.on('connection', (ws) => {
     });
 });
 
+function swapAndSortById(antraegeArray, id1, id2) {
+
+    const antrag1 = antraegeArray.find(a => a.id === id1);
+    const antrag2 = antraegeArray.find(a => a.id === id2);
+
+    if (!antrag1 || !antrag2) return antraegeArray;
+    [antrag1.id, antrag2.id] = [antrag2.id, antrag1.id];
+    return [...antraegeArray].sort((a, b) => a.id - b.id);
+}
+
 function broadcast(data) {
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
@@ -133,6 +173,6 @@ function broadcast(data) {
 // Statische Dateien servieren
 app.use(express.static('public'));
 
-server.listen(3000, '0.0.0.0', () => {
-    console.log('Server läuft auf http://<Ihre-IP>:3000');
+server.listen(port, '0.0.0.0', () => {
+    console.log('Server läuft auf http://<Ihre-IP>:'+port);
 });
