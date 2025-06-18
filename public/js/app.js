@@ -428,7 +428,7 @@ function showAntragDetail(id) {
 
     detailAntragEmpfehlung.innerHTML = `
         <div class="abstimmungsempfehlung ${colorClass}"></div>
-        <span style="margin-left: 10px;">${empfehlungText}</span>
+        <span style="margin-left: 100px; color: white;">${empfehlungText}</span>
     `;
 
     antragDetailModal.style.display = 'flex';

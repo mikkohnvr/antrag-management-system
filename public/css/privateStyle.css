@@ -236,7 +236,7 @@ nav a:hover {
 /* Dropdown box styling */
 #antrag-empfehlung {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.2rem;
     font-size: 1rem;
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -245,8 +245,20 @@ nav a:hover {
     transition: background-color 0.3s ease;
 }
 
-/* Abstimmungsempfehlung styles */
-.abstimmungsempfehlung {
+/* Abstimmungsempfehlung block styling */
+#detail-antrag-empfehlung {
+    display: flex;
+    align-items: flex-start;
+    align-content: flex-start;
+    text-align: left;
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: nowrap;
+    min-width: 600px
+}
+
+#detail-antrag-empfehlung .abstimmungsempfehlung {
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -255,7 +267,13 @@ nav a:hover {
     justify-content: center;
     font-size: 0.8rem;
     font-weight: bold;
-    color: var(--bg-card); /* Keep this as it is the background of the circle itself */
+    color: var(--bg-card);
+}
+
+#detail-antrag-empfehlung span {
+    color: white;
+    font-size: 1rem;
+    font-weight: normal;
 }
 
 .gruen {
@@ -711,4 +729,9 @@ footer {
 #page-live .slide,
 #page-admin .admin-panel {
     color: var(--text) !important;
+}
+
+#page-live .slide,
+#page-live .slide-title {
+    color: black !important;
 }
