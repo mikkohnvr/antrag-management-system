@@ -20,14 +20,14 @@ const navLinks = {
 };
 
 const loginModal = document.getElementById('login-modal');
-const closeModalBtn = document.querySelector('.close-modal'); // For login modal
+const closeModalBtn = document.querySelector('.close-modal');
 const loginSubmitBtn = document.getElementById('login-submit');
 const connectionPopup = document.getElementById('connection-lost-popup');
 const reconnectAttemptElement = document.getElementById('reconnect-attempt');
 const maxReconnectElement = document.getElementById('max-reconnect');
 const reloadPageButton = document.getElementById('reload-page');
 
-// New Detail Modal Elements
+// Detail Modal Elements
 const antragDetailModal = document.getElementById('antrag-detail-modal');
 const closeAntragDetailModalBtn = document.getElementById('close-antrag-detail-modal');
 const detailAntragTitle = document.getElementById('detail-antrag-title');
@@ -36,10 +36,8 @@ const detailAntragBeschreibung = document.getElementById('detail-antrag-beschrei
 const detailAntragLinks = document.getElementById('detail-antrag-links');
 const detailAntragEmpfehlung = document.getElementById('detail-antrag-empfehlung');
 
-
 // WebSocket Initialisierung
 function initWebSocket() {
-    // Anpassen der WebSocket-URL an Ihren Server
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const wsUrl = `${protocol}${window.location.hostname}:3000`;
 
@@ -53,7 +51,6 @@ function initWebSocket() {
         socket.send(JSON.stringify({ type: 'REQUEST_INIT' }));
         const sessionToken = getCookie('sessionToken');
         if (sessionToken) {
-            // Validate token with server
             socket.send(JSON.stringify({
                 type: 'COOKIE_CHECK',
                 uuid: sessionToken
@@ -81,7 +78,7 @@ function initWebSocket() {
         maxReconnectElement.textContent = maxReconnectAttempts;
 
         if (reconnectAttempts < maxReconnectAttempts) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000); // Exponentielles Backoff
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
             console.log(`Versuche erneut in ${delay}ms...`);
 
             setTimeout(() => {
@@ -105,25 +102,23 @@ function handleServerMessage(data) {
             renderAdminAntragsliste();
 
             if (currentSlideId && !pages.live.classList.contains('hidden')) {
-                showAntragAsSlide(currentSlideId, false); // Kein Broadcast
+                showAntragAsSlide(currentSlideId, false);
             }
             break;
 
         case 'SLIDE_CHANGED':
             currentSlideId = data.slideId;
             if (!pages.live.classList.contains('hidden')) {
-                showAntragAsSlide(currentSlideId, false); // Kein Broadcast
+                showAntragAsSlide(currentSlideId, false);
             }
             break;
 
         case 'ANTRAG_ADDED':
-            // Vermeide Duplikate
             if (!antraege.some(a => a.id === data.antrag.id)) {
                 antraege.push(data.antrag);
                 renderAntragsliste();
                 renderAdminAntragsliste();
 
-                // Erfolgsmeldung nur für den Admin, der den Antrag erstellt hat
                 if (data.source === 'self' && isAdmin) {
                     alert(`Antrag #${data.antrag.id} erfolgreich erstellt!`);
                 }
@@ -177,9 +172,7 @@ function handleServerMessage(data) {
             deleteCookie('sessionToken');
             break;
 
-
         case 'EXPORT_DATA':
-            // Create download link
             const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -210,49 +203,81 @@ function handleServerMessage(data) {
     }
 }
 
+// Farbzuordnung für Empfehlungen
+function getColorClassForEmpfehlung(empfehlung) {
+    const colorMap = {
+        'unbedingt-annehmen': 'gruen',
+        'annahmeempfehlung': 'lightgreen',
+        'neutral': 'gelb',
+        'annahme-mit-aenderungen': 'lightpink',
+        'ablehnen': 'rot'
+    };
+
+    return colorMap[empfehlung] || 'gruen';
+}
+
+// Text für Empfehlungen
+function getFullEmpfehlungText(empfehlung) {
+    const textMap = {
+        'unbedingt-annehmen': 'Unbedingt annehmen',
+        'annahmeempfehlung': 'Annahmeempfehlung',
+        'neutral': 'Neutral, besser mit guten ÄA',
+        'annahme-mit-aenderungen': 'Annahme nur mit guten ÄA',
+        'ablehnen': 'Ablehnen'
+    };
+
+    return textMap[empfehlung] || '';
+}
+
+// Kürzel für Empfehlungsanzeige
+function getEmpfehlungKuerzel(empfehlung) {
+    const kuerzelMap = {
+        'unbedingt-annehmen': 'UA',
+        'annahmeempfehlung': 'AE',
+        'neutral': 'N',
+        'annahme-mit-aenderungen': 'AmÄ',
+        'ablehnen': 'AL'
+    };
+
+    return kuerzelMap[empfehlung] || '';
+}
+
 // Antragsliste rendern
 function renderAntragsliste() {
     const liste = document.getElementById('antragsliste');
     liste.innerHTML = '';
 
     antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
-        const empfehlungClass = antrag.empfehlung;
-        let empfehlungText = '';
-
-        switch(antrag.empfehlung) {
-            case 'gruen': empfehlungText = 'Zustimmung'; break;
-            case 'rot': empfehlungText = 'Ablehnung'; break;
-            case 'gelb': empfehlungText = 'Enthaltung'; break;
-        }
+        const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
+        const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
+        const empfehlungKuerzel = getEmpfehlungKuerzel(antrag.empfehlung);
 
         const li = document.createElement('li');
-        li.className = `antrag-card ${empfehlungClass}`;
-        // Füge einen data-id Attribut hinzu, um den Antrag zu identifizieren
+        li.className = `antrag-card ${colorClass}`;
         li.dataset.id = antrag.id;
 
         li.innerHTML = `
-                <h3 class="antrag-title">Antrag ${antrag.id}: ${antrag.titel}</h3>
-                ${antrag.antragsteller ? `<p class="antrag-meta-info"><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
-                <p>${antrag.beschreibung}</p>
-                ${antrag.links && antrag.links.length > 0 ? `
-                    <div class="antrag-links antrag-meta-info">
-                        <strong>Links:</strong>
-                        <ul>
-                            ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-                <div class="antrag-meta">
-                    <span class="badge">#${antrag.id}</span>
-                    <div class="abstimmungsempfehlung ${empfehlungClass}" title="${empfehlungText}">
-                        ${empfehlungText.charAt(0)}
-                    </div>
+            <h3 class="antrag-title">Antrag ${antrag.id}: ${antrag.titel}</h3>
+            ${antrag.antragsteller ? `<p class="antrag-meta-info"><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
+            <p>${antrag.beschreibung}</p>
+            ${antrag.links && antrag.links.length > 0 ? `
+                <div class="antrag-links antrag-meta-info">
+                    <strong>Links:</strong>
+                    <ul>
+                        ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
+                    </ul>
                 </div>
-            `;
+            ` : ''}
+            <div class="antrag-meta">
+                <span class="badge">#${antrag.id}</span>
+                <div class="abstimmungsempfehlung ${colorClass}" title="${empfehlungText}">
+                    ${empfehlungKuerzel}
+                </div>
+            </div>
+        `;
         liste.appendChild(li);
     });
 
-    // Event-Listener für das Öffnen des Detail-Popups hinzufügen
     document.querySelectorAll('.antrag-card').forEach(card => {
         card.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
@@ -267,38 +292,37 @@ function renderAdminAntragsliste() {
     liste.innerHTML = '';
 
     antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
-        const empfehlungClass = antrag.empfehlung;
+        const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
 
         const div = document.createElement('div');
         div.className = 'admin-list-item';
         div.innerHTML = `
-                <div>
-                    <strong>Antrag ${antrag.id}:</strong> ${antrag.titel}
-                    ${antrag.antragsteller ? `<br><span class="antrag-meta-info">Antragsteller*in: ${antrag.antragsteller}</span>` : ''}
-                    ${antrag.links && antrag.links.length > 0 ? `
-                        <br><span class="antrag-meta-info">Links: ${antrag.links.map(link => `<a href="${link}" target="_blank">${link.substring(0, Math.min(link.length, 30))}...</a>`).join(', ')}</span>
-                    ` : ''}
-                    <div class="abstimmungsempfehlung ${empfehlungClass}" style="margin-top: 0.5rem;"></div>
-                </div>
-                <div>
-                    <button class="button button-outline show-slide-btn" data-id="${antrag.id}">
-                        <i class="fas fa-tv"></i> Anzeigen
-                    </button>
-                    <button class="button button-outline move-up-btn" data-id="${antrag.id}">
-                        <i class="fas fa-arrow-up"></i>
-                    </button>
-                    <button class="button button-outline move-down-btn" data-id="${antrag.id}">
-                        <i class="fas fa-arrow-down"></i>
-                    </button>
-                    <button class="button button-outline delete-antrag-btn" data-id="${antrag.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
+            <div>
+                <strong>Antrag ${antrag.id}:</strong> ${antrag.titel}
+                ${antrag.antragsteller ? `<br><span class="antrag-meta-info">Antragsteller*in: ${antrag.antragsteller}</span>` : ''}
+                ${antrag.links && antrag.links.length > 0 ? `
+                    <br><span class="antrag-meta-info">Links: ${antrag.links.map(link => `<a href="${link}" target="_blank">${link.substring(0, Math.min(link.length, 30))}...</a>`).join(', ')}</span>
+                ` : ''}
+                <div class="abstimmungsempfehlung ${colorClass}" style="margin-top: 0.5rem;"></div>
+            </div>
+            <div>
+                <button class="button button-outline show-slide-btn" data-id="${antrag.id}">
+                    <i class="fas fa-tv"></i> Anzeigen
+                </button>
+                <button class="button button-outline move-up-btn" data-id="${antrag.id}">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button class="button button-outline move-down-btn" data-id="${antrag.id}">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button class="button button-outline delete-antrag-btn" data-id="${antrag.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
         liste.appendChild(div);
     });
 
-    // Event-Listener für die neuen Buttons hinzufügen
     document.querySelectorAll('.show-slide-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = parseInt(this.getAttribute('data-id'));
@@ -333,29 +357,25 @@ function showAntragAsSlide(id, broadcast = true) {
     const antrag = antraege.find(a => a.id === id);
     if (!antrag) return;
 
-    const slide = document.getElementById('current-slide');
-    slide.className = `slide active ${antrag.empfehlung}`;
+    const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
+    const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
 
-    let empfehlungText = '';
-    switch(antrag.empfehlung) {
-        case 'gruen': empfehlungText = 'Empfehlung: Zustimmung'; break;
-        case 'rot': empfehlungText = 'Empfehlung: Ablehnung'; break;
-        case 'gelb': empfehlungText = 'Empfehlung: Enthaltung'; break;
-    }
+    const slide = document.getElementById('current-slide');
+    slide.className = `slide active ${colorClass}`;
 
     slide.innerHTML = `
-            <h2 class="slide-title">Antrag ${antrag.id}: ${antrag.titel}</h2>
-            ${antrag.antragsteller ? `<p><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
-            ${antrag.links && antrag.links.length > 0 ? `
-                <div class="slide-links">
-                    <strong>Links:</strong>
-                    <ul>
-                        ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
-                    </ul>
-                </div>
-            ` : ''}
-            <div class="slide-empfehlung ${antrag.empfehlung}">${empfehlungText}</div>
-        `;
+        <h2 class="slide-title">Antrag ${antrag.id}: ${antrag.titel}</h2>
+        ${antrag.antragsteller ? `<p><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
+        ${antrag.links && antrag.links.length > 0 ? `
+            <div class="slide-links">
+                <strong>Links:</strong>
+                <ul>
+                    ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
+                </ul>
+            </div>
+        ` : ''}
+        <div class="slide-empfehlung ${colorClass}">${empfehlungText}</div>
+    `;
 
     if (broadcast && socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
@@ -367,13 +387,9 @@ function showAntragAsSlide(id, broadcast = true) {
 
 // Seiten-Navigation
 function showPage(pageName) {
-    // Alle Seiten verstecken
     Object.values(pages).forEach(page => page.classList.add('hidden'));
-
-    // Gewählte Seite anzeigen
     pages[pageName].classList.remove('hidden');
 
-    // Bei Live-Seite aktuellen Slide anzeigen
     if (pageName === 'live' && currentSlideId) {
         showAntragAsSlide(currentSlideId, false);
     }
@@ -384,32 +400,39 @@ function showAntragDetail(id) {
     const antrag = antraege.find(a => a.id === id);
     if (!antrag) return;
 
+    const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
+    const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
+
     detailAntragTitle.textContent = `Antrag ${antrag.id}: ${antrag.titel}`;
 
     if (antrag.antragsteller) {
         detailAntragAntragsteller.innerHTML = `<strong>Antragsteller*in:</strong> ${antrag.antragsteller}`;
-        detailAntragAntragsteller.style.display = 'block'; // Make sure it's visible
+        detailAntragAntragsteller.style.display = 'block';
     } else {
-        detailAntragAntragsteller.style.display = 'none'; // Hide if no applicant
+        detailAntragAntragsteller.style.display = 'none';
     }
 
     detailAntragBeschreibung.textContent = antrag.beschreibung;
 
     if (antrag.links && antrag.links.length > 0) {
         detailAntragLinks.innerHTML = `
-                <strong>Links:</strong>
-                <ul>
-                    ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
-                </ul>
-            `;
-        detailAntragLinks.style.display = 'block'; // Make sure it's visible
+            <strong>Links:</strong>
+            <ul>
+                ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
+            </ul>
+        `;
+        detailAntragLinks.style.display = 'block';
     } else {
-        detailAntragLinks.style.display = 'none'; // Hide if no links
+        detailAntragLinks.style.display = 'none';
     }
+
+    detailAntragEmpfehlung.innerHTML = `
+        <div class="abstimmungsempfehlung ${colorClass}"></div>
+        <span style="margin-left: 10px;">${empfehlungText}</span>
+    `;
 
     antragDetailModal.style.display = 'flex';
 }
-
 
 // Event-Handler einrichten
 function setupEventListeners() {
@@ -424,8 +447,6 @@ function setupEventListeners() {
         showPage('live');
     });
 
-
-
     navLinks.admin.addEventListener('click', (e) => {
         e.preventDefault();
         if (isAdmin) {
@@ -433,7 +454,7 @@ function setupEventListeners() {
         } else {
             loginModal.style.display = 'flex';
         }
-    }); // Closing navLinks.admin event listener
+    });
 
     reloadPageButton.addEventListener('click', () => {
         location.reload();
@@ -487,7 +508,6 @@ function setupEventListeners() {
                 password
             }));
         }
-
     });
 
     loginModal.addEventListener('click', (e) => {
@@ -514,15 +534,19 @@ function createAntrag() {
     const beschreibung = document.getElementById('antrag-beschreibung').value.trim();
     const antragsteller = document.getElementById('antrag-antragsteller').value.trim();
     const linksInput = document.getElementById('antrag-links').value.trim();
-    const empfehlung = document.getElementById('antrag-empfehlung').value;
+    const empfehlungDropdown = document.getElementById('antrag-empfehlung');
+    const empfehlung = empfehlungDropdown.value;
 
-    // Split links by comma and trim whitespace, filter out empty strings
     const links = linksInput ? linksInput.split(',').map(link => link.trim()).filter(link => link !== '') : [];
 
     if (!titel || !beschreibung) {
         alert('Bitte füllen Sie die Felder "Antragstitel" und "Beschreibung" aus!');
         return;
     }
+
+    const colorClass = getColorClassForEmpfehlung(empfehlung);
+    empfehlungDropdown.className = ''; // Reset classes
+    empfehlungDropdown.classList.add(colorClass);
 
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
@@ -542,7 +566,8 @@ function createAntrag() {
         document.getElementById('antrag-beschreibung').value = '';
         document.getElementById('antrag-antragsteller').value = '';
         document.getElementById('antrag-links').value = '';
-        document.getElementById('antrag-empfehlung').value = 'gruen';
+        document.getElementById('antrag-empfehlung').value = 'unbedingt-annehmen';
+        empfehlungDropdown.className = 'gruen';
     } else {
         alert('Keine Verbindung zum Server! Antrag konnte nicht erstellt werden.');
     }
@@ -615,7 +640,6 @@ function importAntraege(event) {
     reader.readAsText(file);
 }
 
-
 function setCookie(name, value, daysToLive) {
     const date = new Date();
     date.setTime(date.getTime() + (daysToLive * 24 * 60 * 60 * 1000));
@@ -644,10 +668,21 @@ function deleteCookie(name) {
     setCookie(name, "", -1);
 }
 
-
-
 document.addEventListener('DOMContentLoaded', function() {
     initWebSocket();
     setupEventListeners();
     showPage('antraege');
+
+    // Dropdown color update on change
+    const empfehlungDropdown = document.getElementById('antrag-empfehlung');
+    empfehlungDropdown.addEventListener('change', () => {
+        const selectedValue = empfehlungDropdown.value;
+        const colorClass = getColorClassForEmpfehlung(selectedValue);
+
+        empfehlungDropdown.className = '';
+        empfehlungDropdown.classList.add(colorClass);
+    });
+
+    // Initiale Farbe setzen
+    empfehlungDropdown.className = 'gruen';
 });

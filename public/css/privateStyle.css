@@ -2,9 +2,9 @@
     --primary: #00bcd4;
     --primary-dark: #008ba3;
     --bg-dark: #121212;
-    --bg-darker: #0a0a0a;
+    --bg-darker: #0f0f0f;
     --bg-card: #1e1e1e; /* This is the dark background for cards */
-    --text: #e0e0e0; /* This is your desired white/light grey text color */
+    --text: #f4f4f4; /* This is your desired white/light grey text color */
     --text-secondary: #a0a0a0;
     --success: #2e7d32;
     --danger: #c62828;
@@ -131,6 +131,7 @@ nav a:hover {
 .antragsliste {
     list-style: none;
     padding: 0;
+    margin: 0;
     display: grid;
     /* Adjust minmax to be slightly smaller to account for potential gaps/margins */
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -232,6 +233,19 @@ nav a:hover {
     margin-top: 1rem;
 }
 
+/* Dropdown box styling */
+#antrag-empfehlung {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-card); /* Default background */
+    color: var(--text); /* Default text color */
+    transition: background-color 0.3s ease;
+}
+
+/* Abstimmungsempfehlung styles */
 .abstimmungsempfehlung {
     width: 24px;
     height: 24px;
@@ -242,6 +256,30 @@ nav a:hover {
     font-size: 0.8rem;
     font-weight: bold;
     color: var(--bg-card); /* Keep this as it is the background of the circle itself */
+}
+
+.gruen {
+    background-color: var(--success);
+    border-left-color: var(--success);
+}
+
+.rot {
+    background-color: var(--danger);
+    border-left-color: var(--danger);
+}
+
+.gelb {
+    background-color: var(--warning);
+    border-left-color: var(--warning);
+    color: var(--bg-card); /* Keep this as it is the background of the circle itself */
+}
+
+.lightgreen {
+    background-color: lightgreen;
+}
+
+.lightpink {
+    background-color: lightpink;
 }
 
 .gruen {
@@ -267,7 +305,7 @@ nav a:hover {
     color: var(--text); /* Badge text color should remain white/light */
 }
 
-/* Live Slideshow Styles */
+
 .slideshow-container {
     position: relative;
     width: 100%;
@@ -581,12 +619,96 @@ footer {
     content: '';
     display: block;
     height: 100%;
-    width: 0%;
+    width: 0;
     background-color: #d32f2f;
     animation: progressBar 2.5s linear infinite;
 }
 
 @keyframes progressBar {
-    0% { width: 0%; }
+    0% { width: 0; }
     100% { width: 100%; }
+}
+
+#page-live .slide-links{
+    display: none !important;
+}
+
+#page-live .slide-title {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.logo img {
+    max-width: 100%;
+    height: auto; /* Maintains aspect ratio */
+    object-fit: contain; /* Prevents distortion */
+}
+
+@media (max-width: 768px) {
+    .logo img {
+        max-width: 100%; /* Adjusts size for smaller screens */
+        display: block; /* Makes the image a block element */
+        margin: auto; /* Centers the image horizontally */
+    }
+}
+
+@media (max-width: 480px) {
+    .logo img {
+        max-width: 100%; /* Further adjusts size for very small screens */
+        display: block; /* Ensures block-level behavior */
+        margin: auto; /* Centers the image horizontally */
+    }
+}
+
+#page-antraege img {
+    max-width: 100%; /* Increase size for mobile screens */
+    height: auto; /* Maintain aspect ratio */
+    margin: auto;
+}
+
+#page-live img {
+    max-width: 100%; /* Increase size for mobile screens */
+    height: auto; /* Maintain aspect ratio */
+}
+
+@media (max-width: 768px) {
+    #page-antraege img,
+    #page-live img {
+        min-width: 60%; /* Increase size for mobile screens */
+        height: auto;
+        margin: auto;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #page-antraege img,
+    #page-live img {
+        min-width: 60%; /* Increase size for mobile screens */
+        height: auto;
+        margin: auto;
+        text-align: center;
+    }
+}
+
+.antrag-card {
+    color: black !important;
+}
+
+.antrag-card * {
+    color: inherit !important;
+}
+
+
+.antrag-card .abstimmungsempfehlung {
+    color: white !important;
+}
+
+.antrag-card a {
+    color: #003988 !important;
+}
+
+#page-live .slide,
+#page-admin .admin-panel {
+    color: var(--text) !important;
 }
