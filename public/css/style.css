@@ -245,19 +245,37 @@ nav a:hover {
     transition: background-color 0.3s ease;
 }
 
-/* Abstimmungsempfehlung block styling */
+/* Updated CSS */
 #detail-antrag-empfehlung {
     display: flex;
-    align-items: flex-start;
-    align-content: flex-start;
-    text-align: left;
-    justify-content: flex-start;
+    align-items: center; /* Better vertical alignment */
     gap: 1rem;
     margin-top: 1rem;
     flex-wrap: nowrap;
-    min-width: 600px
+    min-width: unset; /* Remove fixed width */
+    width: 100%; /* Full width for mobile */
 }
 
+#detail-antrag-empfehlung > span {
+    white-space: normal; /* Allow text wrapping */
+    word-break: break-word; /* Prevent overflow */
+    line-height: 1.4; /* Better readability */
+    font-size: 1rem; /* Adjust as needed */
+}
+
+/* Mobile-first adjustments */
+@media (max-width: 767px) {
+    #detail-antrag-empfehlung {
+        flex-wrap: wrap; /* Allow wrapping on mobile */
+        align-items: flex-start; /* Align items to top */
+    }
+    
+    #detail-antrag-empfehlung .abstimmungsempfehlung {
+        margin-top: 0.25rem; /* Optical alignment with first line */
+    }
+}
+
+/* Keep existing circle styles */
 #detail-antrag-empfehlung .abstimmungsempfehlung {
     width: 24px;
     height: 24px;
@@ -268,12 +286,7 @@ nav a:hover {
     font-size: 0.8rem;
     font-weight: bold;
     color: var(--bg-card);
-}
-
-#detail-antrag-empfehlung span {
-    color: white;
-    font-size: 1rem;
-    font-weight: normal;
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
 .gruen {
