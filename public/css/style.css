@@ -775,3 +775,15 @@ footer {
 #page-live .slide-title {
     color: black !important;
 }
+
+.check {
+  display: flex;
+  
+   /* optional - to vertically align items */
+}
+
+.check input[type="checkbox"] {
+  order: -1; /* moves checkbox before label in flex container */
+  margin-right: 16px; /* adds some space between checkbox and label */
+  max-width: 25px !important;
+}

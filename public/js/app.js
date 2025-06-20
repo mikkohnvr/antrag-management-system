@@ -252,7 +252,7 @@ function renderAntragsliste() {
 
 
     antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
-        if(antrag.empfehlung != 'versteckt') {
+        if(antrag.empfehlung != 'versteckt' && !antrag.eilAntrag) {
             const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
             const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
             const empfehlungKuerzel = getEmpfehlungKuerzel(antrag.empfehlung);
@@ -300,12 +300,17 @@ function renderAdminAntragsliste() {
 
     antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
         const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
-
+        var headerColor = 'white';
+        if(antrag.empfehlung === 'versteckt') {
+            headerColor = 'darkgrey';
+        } else if (antrag.eilAntrag) {
+            headerColor = 'red';
+        }
         const div = document.createElement('div');
         div.className = 'admin-list-item';
         div.innerHTML = `
             <div>
-                <strong>Antrag ${antrag.id}:</strong> ${antrag.titel}
+                <strong style="color: ${headerColor}">Antrag ${antrag.id}:</strong> ${antrag.titel}
                 ${antrag.antragsteller ? `<br><span class="antrag-meta-info">Antragsteller*in: ${antrag.antragsteller}</span>` : ''}
                 ${antrag.links && antrag.links.length > 0 ? `
                     <br><span class="antrag-meta-info">Links: ${antrag.links.map(link => `<a href="${link}" target="_blank">${link.substring(0, Math.min(link.length, 30))}...</a>`).join(', ')}</span>
@@ -546,6 +551,7 @@ function createAntrag() {
     const antragsteller = document.getElementById('antrag-antragsteller').value.trim();
     const linksInput = document.getElementById('antrag-links').value.trim();
     const empfehlungDropdown = document.getElementById('antrag-empfehlung');
+    const eilAntrag = document.getElementById('eilantrag').checked;
     const empfehlung = empfehlungDropdown.value;
 
     const links = linksInput ? linksInput.split(',').map(link => link.trim()).filter(link => link !== '') : [];
@@ -567,7 +573,8 @@ function createAntrag() {
                 beschreibung,
                 antragsteller,
                 links,
-                empfehlung
+                empfehlung,
+                eilAntrag
             },
             source: 'self'
         }));
@@ -578,6 +585,7 @@ function createAntrag() {
         document.getElementById('antrag-antragsteller').value = '';
         document.getElementById('antrag-links').value = '';
         document.getElementById('antrag-empfehlung').value = 'unbedingt-annehmen';
+        document.getElementById('eilantrag').checked = false
         empfehlungDropdown.className = 'gruen';
     } else {
         alert('Keine Verbindung zum Server! Antrag konnte nicht erstellt werden.');

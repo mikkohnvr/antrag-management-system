@@ -62,7 +62,7 @@ wss.on('connection', (ws) => {
     // Send initial state
     ws.send(JSON.stringify({
         type: 'INIT',
-        antraege: antraege,
+        antraege: removeEilAntraege(antraege),
         currentSlideId: currentSlideId
     }));
 
@@ -79,6 +79,11 @@ wss.on('connection', (ws) => {
                         type: 'AUTH_SUCCESS',
                         uuid: lifeTimeUUID
                     }));
+                     ws.send(JSON.stringify({
+                        type: 'INIT',
+                        antraege: antraege,
+                        currentSlideId: currentSlideId
+                    }));
                 } else {
                     ws.send(JSON.stringify({ type: 'AUTH_FAILED' }));
                 }
@@ -90,6 +95,11 @@ wss.on('connection', (ws) => {
                 if (data.uuid === lifeTimeUUID) {
                     ws.isAuthenticated = true;
                     ws.send(JSON.stringify({ type: 'COOKIE_SUCCESS' }));
+                    ws.send(JSON.stringify({
+                        type: 'INIT',
+                        antraege: antraege,
+                        currentSlideId: currentSlideId
+                    }));
                 } else {
                     ws.send(JSON.stringify({ type: 'COOKIE_FAILED' }));
                 }
@@ -109,6 +119,10 @@ wss.on('connection', (ws) => {
                 case 'CHANGE_SLIDE':
                     if (antraege.some(a => a.id === data.slideId)) {
                         currentSlideId = data.slideId;
+                        antrag = antraege.find(antrag => antrag.id === data.slideId)
+                        if (antrag.eilAntrag) {
+                            broadcast({ type: 'ANTRAG_ADDED', antrag: antrag });
+                        }
                         broadcast({ type: 'SLIDE_CHANGED', slideId: currentSlideId });
                     }
                     break;
@@ -122,7 +136,12 @@ wss.on('connection', (ws) => {
                         links: data.antrag.links || []
                     };
                     antraege.push(newAntrag);
-                    broadcast({ type: 'ANTRAG_ADDED', antrag: newAntrag });
+                    if (newAntrag.eilAntrag) {
+                        broadcastAuth({ type: 'ANTRAG_ADDED', antrag: newAntrag });
+                    } else {
+                        broadcast({ type: 'ANTRAG_ADDED', antrag: newAntrag });
+                    }
+                    
                     break;
 
                 case 'DELETE_ANTRAG':
@@ -186,7 +205,7 @@ function handleImportData(ws, data) {
         if (!Array.isArray(data)) throw new Error('Invalid data format');
 
         const isValid = data.every(antrag =>
-            antrag.id && antrag.titel && antrag.beschreibung && antrag.empfehlung &&
+            antrag.id && antrag.titel && antrag.beschreibung && antrag.empfehlung && antrag.eilAntrag &&
             typeof antrag.antragsteller === 'string' &&
             Array.isArray(antrag.links)
         );
@@ -209,9 +228,26 @@ function handleImportData(ws, data) {
     }
 }
 
+function removeEilAntraege(antraege) {
+    return antraege.filter(antrag => 
+        !antrag.eilAntrag || antrag.id === currentSlideId
+    );
+}
+
 function broadcast(data) {
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
+        }
+    });
+}
+
+function broadcastAuth(data) {
+    wss.clients.forEach(client => {
+        if (
+            client.readyState === WebSocket.OPEN &&
+            client.isAuthenticated
+        ) {
             client.send(JSON.stringify(data));
         }
     });
