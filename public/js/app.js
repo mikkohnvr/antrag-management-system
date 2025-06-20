@@ -262,7 +262,7 @@ function renderAntragsliste() {
             li.dataset.id = antrag.id;
     
             li.innerHTML = `
-                <h3 class="antrag-title">Antrag ${antrag.id}: ${antrag.titel}</h3>
+                <h3 class="antrag-title">${antrag.titel}</h3>
                 ${antrag.antragsteller ? `<p class="antrag-meta-info"><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
                 <p>${antrag.beschreibung}</p>
                 ${antrag.links && antrag.links.length > 0 ? `
@@ -376,7 +376,7 @@ function showAntragAsSlide(id, broadcast = true) {
     slide.className = `slide active ${colorClass}`;
     var header = '';
     if (antrag.empfehlung != 'versteckt') {
-        header = `<h2 class="slide-title">Antrag ${antrag.id}: ${antrag.titel}</h2>`;
+        header = `<h2 class="slide-title">${antrag.titel}</h2>`;
     } else {
         header = `<h2 class="slide-title">Info: ${antrag.titel}</h2>`;
     }
@@ -419,7 +419,7 @@ function showAntragDetail(id) {
     const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
     const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
 
-    detailAntragTitle.textContent = `Antrag ${antrag.id}: ${antrag.titel}`;
+    detailAntragTitle.textContent = `${antrag.titel}`;
 
     if (antrag.antragsteller) {
         detailAntragAntragsteller.innerHTML = `<strong>Antragsteller*in:</strong> ${antrag.antragsteller}`;
