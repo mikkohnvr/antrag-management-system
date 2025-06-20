@@ -57,7 +57,6 @@ let currentSlideId = null;
 
 // WebSocket Server
 wss.on('connection', (ws) => {
-    console.log('New WebSocket connection');
     ws.isAuthenticated = false;
 
     // Send initial state
@@ -163,7 +162,7 @@ wss.on('connection', (ws) => {
         }
     });
 
-    ws.on('close', () => console.log('Client disconnected'));
+   
 });
 
 function handleMoveAntrag(antragId, direction) {
