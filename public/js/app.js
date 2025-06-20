@@ -369,10 +369,14 @@ function showAntragAsSlide(id, broadcast = true) {
 
     const slide = document.getElementById('current-slide');
     slide.className = `slide active ${colorClass}`;
-
-    slide.innerHTML = `
-        <h2 class="slide-title">Antrag ${antrag.id}: ${antrag.titel}</h2>
-        ${antrag.antragsteller ? `<p><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
+    var header = '';
+    if (antrag.empfehlung != 'versteckt') {
+        header = `<h2 class="slide-title">Antrag ${antrag.id}: ${antrag.titel}</h2>`;
+    } else {
+        header = `<h2 class="slide-title">Info: ${antrag.titel}</h2>`;
+    }
+    slide.innerHTML = header + `
+        ${antrag.antragsteller ? `<p><strong>Antragsteller*in:</strong> ${antrag.antragsteller}<br><a href="#" onclick="showAntragDetail(${antrag.id})">weitere Informationen</a></p>` : ''}
         ${antrag.links && antrag.links.length > 0 ? `
             <div class="slide-links">
                 <strong>Links:</strong>
