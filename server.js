@@ -14,7 +14,8 @@ const wss = new WebSocket.Server({ server });
 // Configuration
 const port = process.env.PORT || 3000;
 const publicDir = path.resolve(__dirname, 'public');
-const lifeTimeUUID = uuid.v4();
+//const lifeTimeUUID = uuid.v4();
+const lifeTimeUUID = 'asdf'
 const adminCredentials = {
     username: process.env.ADMIN_USERNAME,
     password: process.env.ADMIN_PASSWORD

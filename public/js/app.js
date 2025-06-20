@@ -210,7 +210,8 @@ function getColorClassForEmpfehlung(empfehlung) {
         'annahmeempfehlung': 'lightgreen',
         'neutral': 'gelb',
         'annahme-mit-aenderungen': 'lightpink',
-        'ablehnen': 'rot'
+        'ablehnen': 'rot',
+        'versteckt': 'white'
     };
 
     return colorMap[empfehlung] || 'gruen';
@@ -223,7 +224,8 @@ function getFullEmpfehlungText(empfehlung) {
         'annahmeempfehlung': 'Annahmeempfehlung',
         'neutral': 'Neutral, besser mit guten ÄA',
         'annahme-mit-aenderungen': 'Annahme nur mit guten ÄA',
-        'ablehnen': 'Ablehnen'
+        'ablehnen': 'Ablehnen',
+        'versteckt': 'Info'
     };
 
     return textMap[empfehlung] || '';
@@ -236,7 +238,8 @@ function getEmpfehlungKuerzel(empfehlung) {
         'annahmeempfehlung': 'AE',
         'neutral': 'N',
         'annahme-mit-aenderungen': 'AmÄ',
-        'ablehnen': 'AL'
+        'ablehnen': 'AL',
+        'versteckt': 'Info'
     };
 
     return kuerzelMap[empfehlung] || '';
@@ -247,35 +250,39 @@ function renderAntragsliste() {
     const liste = document.getElementById('antragsliste');
     liste.innerHTML = '';
 
+
     antraege.sort((a, b) => a.id - b.id).forEach(antrag => {
-        const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
-        const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
-        const empfehlungKuerzel = getEmpfehlungKuerzel(antrag.empfehlung);
-
-        const li = document.createElement('li');
-        li.className = `antrag-card ${colorClass}`;
-        li.dataset.id = antrag.id;
-
-        li.innerHTML = `
-            <h3 class="antrag-title">Antrag ${antrag.id}: ${antrag.titel}</h3>
-            ${antrag.antragsteller ? `<p class="antrag-meta-info"><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
-            <p>${antrag.beschreibung}</p>
-            ${antrag.links && antrag.links.length > 0 ? `
-                <div class="antrag-links antrag-meta-info">
-                    <strong>Links:</strong>
-                    <ul>
-                        ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
-                    </ul>
+        if(antrag.empfehlung != 'versteckt') {
+            const colorClass = getColorClassForEmpfehlung(antrag.empfehlung);
+            const empfehlungText = getFullEmpfehlungText(antrag.empfehlung);
+            const empfehlungKuerzel = getEmpfehlungKuerzel(antrag.empfehlung);
+    
+            const li = document.createElement('li');
+            li.className = `antrag-card ${colorClass}`;
+            li.dataset.id = antrag.id;
+    
+            li.innerHTML = `
+                <h3 class="antrag-title">Antrag ${antrag.id}: ${antrag.titel}</h3>
+                ${antrag.antragsteller ? `<p class="antrag-meta-info"><strong>Antragsteller*in:</strong> ${antrag.antragsteller}</p>` : ''}
+                <p>${antrag.beschreibung}</p>
+                ${antrag.links && antrag.links.length > 0 ? `
+                    <div class="antrag-links antrag-meta-info">
+                        <strong>Links:</strong>
+                        <ul>
+                            ${antrag.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                <div class="antrag-meta">
+                    <span class="badge">#${antrag.id}</span>
+                    <div class="abstimmungsempfehlung ${colorClass}" title="${empfehlungText}">
+                        ${empfehlungKuerzel}
+                    </div>
                 </div>
-            ` : ''}
-            <div class="antrag-meta">
-                <span class="badge">#${antrag.id}</span>
-                <div class="abstimmungsempfehlung ${colorClass}" title="${empfehlungText}">
-                    ${empfehlungKuerzel}
-                </div>
-            </div>
-        `;
-        liste.appendChild(li);
+            `;
+            liste.appendChild(li);
+        }
+
     });
 
     document.querySelectorAll('.antrag-card').forEach(card => {
