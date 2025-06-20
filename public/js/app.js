@@ -4,7 +4,7 @@ let antraege = [];
 let currentSlideId = null;
 let isAdmin = false;
 let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
+const maxReconnectAttempts = 4;
 
 // DOM Elements
 const pages = {
@@ -73,16 +73,18 @@ function initWebSocket() {
 
     socket.onclose = (event) => {
         console.log(`Verbindung getrennt (Code: ${event.code}, Grund: ${event.reason || 'Unbekannt'})`);
-        connectionPopup.classList.remove('hidden');
+        
         reconnectAttemptElement.textContent = reconnectAttempts;
         maxReconnectElement.textContent = maxReconnectAttempts;
 
         if (reconnectAttempts < maxReconnectAttempts) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+            const delay = Math.min(2000 * Math.pow(2, reconnectAttempts), 10000);
+            
             console.log(`Versuche erneut in ${delay}ms...`);
 
             setTimeout(() => {
                 reconnectAttempts++;
+                connectionPopup.classList.remove('hidden');
                 initWebSocket();
             }, delay);
         } else {
