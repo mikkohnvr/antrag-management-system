@@ -457,18 +457,40 @@ textarea {
     z-index: 1000;
     justify-content: center;
     align-items: center;
-    overflow-y: auto; /* Allow scrolling if modal content is too long */
+    overflow-y: auto; /* Allow vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .modal-content {
     background: var(--bg-card);
     padding: 2rem;
     border-radius: 10px;
-    width: 90%; /* Use percentage for mobile responsiveness */
-    max-width: 400px;
+    width: 90%;
+    max-width: 1000px;
     position: relative;
-    color: var(--text); /* Modal content text color */
-    box-sizing: border-box; /* Ensure padding is included in width */
+    color: var(--text);
+    box-sizing: border-box;
+    
+    /* Height constraints */
+    max-height: min(90vh, 100%);
+    overflow-y: auto; /* Internal vertical scrolling */
+    
+    /* Prevent horizontal overflow */
+    overflow-x: hidden;
+    
+    /* Content wrapping */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    
+    /* Safe spacing */
+    margin: 20px 0;
+}
+
+@media (max-height: 600px) {
+    .modal-content {
+        max-height: 85vh; /* More space for content */
+        padding: 1.5rem; /* Reduce padding */
+    }
 }
 
 .close-modal {
